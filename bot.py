@@ -6,6 +6,11 @@ intents = discord.Intents.default()
 intents.message_content = True 
 intents.members = True
 
+def is_owner():
+    async def predicate(ctx):
+        return ctx.author.id == 999470418178080789
+    return check(predicate)
+
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
@@ -31,6 +36,7 @@ async def on_ready():
 
 
 @bot.command()
+@is_owner()
 async def regras(ctx):
     embed = discord.Embed(
         title="",
@@ -57,6 +63,7 @@ async def regras(ctx):
     await ctx.send(embed=embed)
 
 @bot.command()
+@is_owner()
 async def regras2(ctx):
     embed = discord.Embed(
         title="",
@@ -70,6 +77,7 @@ async def regras2(ctx):
     await ctx.send(embed=embed)
 
 @bot.command()
+@is_owner()
 async def curso(ctx):
     embed = discord.Embed(
         title="",
@@ -82,6 +90,29 @@ async def curso(ctx):
 
     await ctx.send(embed=embed)
 
+CHANNEL_ID = 1396485518614855783  
+TIKTOK_RSS_URL = "https://rsshub.app/tiktok/user/kaykypremiere"  
 
+last_video = None
+
+
+@bot.event
+async def on_ready():
+    print(f'Logado como {bot.user}')
+    check_tiktok.start()
+
+
+@tasks.loop(minutes=10)
+async def check_tiktok():
+    global last_video
+    feed = feedparser.parse(TIKTOK_RSS_URL)
+    if not feed.entries:
+        return
+
+    latest = feed.entries[0]
+    if latest.link != last_video:
+        channel = bot.get_channel(CHANNEL_ID)
+        await channel.send(f"🎵 Novo vídeo postado no TikTok: {latest.link}")
+        last_video = latest.link
 
 bot.run(os.getenv("DISCORD_TOKEN"))
