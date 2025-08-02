@@ -140,7 +140,7 @@ async def on_message(message):
             return
 
         try:
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel('models/gemini-1.5-pro')
             response = model.generate_content(prompt)
             await message.channel.send(response.text)
         except Exception as e:
@@ -150,5 +150,6 @@ async def on_message(message):
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
 
