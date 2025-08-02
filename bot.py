@@ -116,4 +116,11 @@ async def check_tiktok():
         await channel.send(f"🎵 Novo vídeo postado no TikTok: {latest.link}")
         last_video = latest.link
 
+@bot.command()
+async def membercount(ctx):
+    guild = ctx.guild  # pega o servidor atual
+    member_count = guild.member_count
+    await ctx.send(f"O servidor tem **{member_count} membros**!")
+
 bot.run(os.getenv("DISCORD_TOKEN"))
+
