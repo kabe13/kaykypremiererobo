@@ -165,7 +165,6 @@ async def on_message(message):
         try:
             historico_db = recuperar_memoria()
             
-            # Use um loop for para adicionar os itens um por um
             historico_formatado = []
             for m in historico_db:
                 historico_formatado.append({"role": "user", "parts": [m["prompt"]]})
@@ -173,7 +172,7 @@ async def on_message(message):
             
             chat = model.start_chat(history=historico_formatado)
             
-            response = await chat.send_message(prompt)
+            response = chat.send_message(prompt)
             texto = extrair_texto(response)
             
             salvar_interacao(prompt, texto)
@@ -185,5 +184,6 @@ async def on_message(message):
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
 
