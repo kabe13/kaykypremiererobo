@@ -149,44 +149,41 @@ def extrair_texto(resposta):
         return "Erro ao interpretar resposta."
         
 model = genai.GenerativeModel('models/gemini-1.5-flash')
-bot.event
+
+@bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
-
+    
     if bot.user.mentioned_in(message):
         prompt = message.content.replace(f"<@{bot.user.id}>", "").strip()
-
+        
         if prompt == "":
             await message.channel.send("Me mencione com uma pergunta ou pedido.")
             return
-
-        try:
-            # 1. Recupera o histórico do banco de dados
-            historico_db = recuperar_memoria()
-
-            # 2. Converte o histórico para o formato da API
-            historico_formatado = [
-                {"role": "user", "parts": [m["prompt"]]},
-                {"role": "model", "parts": [m["resposta"]]}
-                for m in historico_db
-            ]
             
-            # 3. Inicia um chat com o histórico
+        try:
+            historico_db = recuperar_memoria()
+            
+            # Use um loop for para adicionar os itens um por um
+            historico_formatado = []
+            for m in historico_db:
+                historico_formatado.append({"role": "user", "parts": [m["prompt"]]})
+                historico_formatado.append({"role": "model", "parts": [m["resposta"]]})
+            
             chat = model.start_chat(history=historico_formatado)
-
-            # 4. Envia a nova mensagem do usuário para o chat
+            
             response = await chat.send_message(prompt)
             texto = extrair_texto(response)
-
-            # 5. Salva a nova interação
+            
             salvar_interacao(prompt, texto)
             await message.channel.send(texto)
-
+            
         except Exception as e:
             await message.channel.send("Erro ao acessar o Gemini: " + str(e))
-
+            
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
