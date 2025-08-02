@@ -3,6 +3,10 @@ from discord.ext import commands, tasks
 from discord.ext.commands import check
 import google.generativeai as genai
 import os
+import feedparser
+from tinydb import TinyDB
+
+db = TinyDB("memoria.json")
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
@@ -125,33 +129,47 @@ async def membercount(ctx):
     member_count = guild.member_count
     await ctx.send(f"O servidor tem **{member_count} membros**!")
 
+def salvar_interacao(prompt, resposta):
+    historico = db.table("historico")
+    historico.insert({"prompt": prompt, "resposta": resposta})
+
+    registros = historico.all()
+    if len(registros) > 20:
+        ids_para_remover = [r.doc_id for r in registros[:10]]
+        historico.remove(doc_ids=ids_para_remover)
+
+def recuperar_memoria():
+    historico = db.table("historico")
+    return historico.all()
+
+def extrair_texto(resposta):
+    try:
+        return resposta.candidates[0].content.parts[0].text
+    except:
+        return "Erro ao interpretar resposta."
+
 @bot.event
 async def on_message(message):
-    # Evita que o bot responda a si mesmo
     if message.author == bot.user:
         return
 
-    # Verifica se o bot foi mencionado
     if bot.user.mentioned_in(message):
         prompt = message.content.replace(f"<@{bot.user.id}>", "").strip()
 
         if prompt == "":
-            await message.channel.send("Me mencione com uma pergunta ou pedido, tipo: `@Bot Qual a capital do Brasil?`")
+            await message.channel.send("Me mencione com uma pergunta ou pedido.")
             return
 
         try:
             model = genai.GenerativeModel('models/gemini-1.5-flash')
             response = model.generate_content(prompt)
-            await message.channel.send(response.text)
+            texto = extrair_texto(response)
+
+            salvar_interacao(prompt, texto)
+            await message.channel.send(texto)
         except Exception as e:
             await message.channel.send("Erro ao acessar o Gemini: " + str(e))
 
-    # Isso permite que outros comandos (com prefixo !) ainda funcionem
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
-
-
-
-
-
