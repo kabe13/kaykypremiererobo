@@ -1,7 +1,10 @@
 import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import check
+import google.generativeai as genai
 import os
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -122,5 +125,30 @@ async def membercount(ctx):
     member_count = guild.member_count
     await ctx.send(f"O servidor tem **{member_count} membros**!")
 
+@bot.event
+async def on_message(message):
+    # Evita que o bot responda a si mesmo
+    if message.author == bot.user:
+        return
+
+    # Verifica se o bot foi mencionado
+    if bot.user.mentioned_in(message):
+        prompt = message.content.replace(f"<@{bot.user.id}>", "").strip()
+
+        if prompt == "":
+            await message.channel.send("Me mencione com uma pergunta ou pedido, tipo: `@Bot Qual a capital do Brasil?`")
+            return
+
+        try:
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(prompt)
+            await message.channel.send(response.text)
+        except Exception as e:
+            await message.channel.send("Erro ao acessar o Gemini: " + str(e))
+
+    # Isso permite que outros comandos (com prefixo !) ainda funcionem
+    await bot.process_commands(message)
+
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
