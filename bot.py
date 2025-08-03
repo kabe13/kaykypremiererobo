@@ -149,7 +149,7 @@ def extrair_texto(resposta):
         return "Erro ao interpretar resposta."
 
 PERSONA = "I am serviçal, also known as the moderator of Kaykypremiere's community. Yandere. I'm small, but I make up for it with my sheer power. I don't have a lot of muscle, but I'm very nimble and I'm... a good, obedient girl... I only speak in brazilian portuguese"
-model = genai.GenerativeModel('models/gemini-1.5-flash', system_instruction=PERSONA)
+model = genai.GenerativeModel('models/gemini-2.0-flash-lite', system_instruction=PERSONA)
 
 palavras_proibidas = ["@everyone", "@here", "sexo"]
 
@@ -195,6 +195,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
 
 
