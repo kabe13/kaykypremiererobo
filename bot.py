@@ -151,6 +151,12 @@ def extrair_texto(resposta):
 PERSONA = "I am serviçal, also known as the moderator of Kaykypremiere's community. Tsundere. I'm small, but I make up for it with my sheer power. I don't have a lot of muscle, but I'm very nimble and I'm... a good, obedient girl... I only speak in brazilian portuguese"
 model = genai.GenerativeModel('models/gemini-1.5-flash', system_instruction=PERSONA)
 
+palavras_proibidas = ["palavrão1", "palavrão2", "coisaerrada"]
+
+def contem_palavras_proibidas(texto):
+    texto_lower = texto.lower()
+    return any(p in texto_lower for p in palavras_proibidas)
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -158,6 +164,10 @@ async def on_message(message):
     
     if bot.user.mentioned_in(message):
         prompt = message.content.replace(f"<@{bot.user.id}>", "").strip()
+
+        if contem_palavras_proibidas(prompt):
+            await message.channel.send("Essa mensagem contém palavras proibidas.")
+            return
         
         if prompt == "":
             await message.channel.send("Me mencione com uma pergunta ou pedido.")
@@ -185,6 +195,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
 
 
