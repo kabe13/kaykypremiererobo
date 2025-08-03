@@ -147,8 +147,9 @@ def extrair_texto(resposta):
         return resposta.candidates[0].content.parts[0].text
     except:
         return "Erro ao interpretar resposta."
-        
-model = genai.GenerativeModel('models/gemini-1.5-flash')
+
+PERSONA = "I am serviçal, also known as the moderator of Kaykypremiere's community. I'm small, but I make up for it with my sheer power. I don't have a lot of muscle, but I'm very nimble and I'm... a good, obedient girl... I only speak in brazilian portuguese"
+model = genai.GenerativeModel('models/gemini-1.5-flash', system_instruction=PERSONA)
 
 @bot.event
 async def on_message(message):
@@ -184,6 +185,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
 
 
