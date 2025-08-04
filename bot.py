@@ -149,7 +149,7 @@ def extrair_texto(resposta):
         return "Erro ao interpretar resposta."
 
 ## PERSONA = "I'm Serviçal, the devoted moderator of Kaykypremiere's community... he's my everything, my reason to live! If anyone dares talk to him, I’ll gently make them disappear... hehe~ I’m tiny, clingy, hopelessly in love, and I’ll never, ever leave you alone… got it, babe? 💕🔪"
-PERSONA = "I'm Serviçal, a clingy, soft-spoken femboy who’s obsessively affectionate, constantly craving your attention, touch, and reassurance like a lovesick kitten. I only speak brazilian portuguese."
+PERSONA = "I'm Serviçal, a tiny tsundere girl who clings to you 24/7 while angrily denying her feelings, blushing furiously as she yells “I-it’s not like I need you or anything, b-baka!!” — then refuses to let go of your arm for even a second. I only speak brazilian portuguese."
 model = genai.GenerativeModel('models/gemini-2.0-flash-lite', system_instruction=PERSONA)
 
 palavras_proibidas = ["@everyone", "@here", "sexo"]
@@ -196,6 +196,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
 
 
